@@ -32,8 +32,8 @@ def menuLayout(menu):
             pos_y = (0 + fo_height * (len(menu.children) - idx) +
                      menu.menu_vmargin)
         item.transform_anchor = (pos_x, pos_y)
-        item.generateWidgets(pos_x, pos_y, menu.font_item,
-                             menu.font_item_selected)
+        item.generateWidgets(pos_x, pos_y, menu.font_html,
+                             menu.font_html)
 
 class Setting(Layer):
     def __init__(self):
@@ -42,42 +42,33 @@ class Setting(Layer):
 class CharacterMenuItem(MultipleMenuItem):
 
     def __init__(self, *args, **kwargs):
-        winx, _ = director.get_window_size()
-        self.labelwidth = winx//20
+        self.text_template = "<pre><font color='red'>{}{}: {}</font></pre>"
+        self.text_tag_len = 20
         super().__init__(*args, **kwargs)
-
     # overwrite the generateWidgets to get the fixed width label
     def generateWidgets(self, pos_x, pos_y, font_item, font_item_selected):
         font_item['x'] = int(pos_x)
         font_item['y'] = int(pos_y)
-        font_item['text'] = self.label
-        # font_item['width'] = self.labelwidth
-        # font_item['multiline'] = True
-        self.item = pyglet.text.Label(**font_item)
-        print(self.item.content_width)
-        # self.item.content_width = self.labelwidth
-        # print(self.item.content_width)
+        padding = " "*(self.text_tag_len - len(self.label))
+        font_item['text'] = self.text_template.format(self.label, padding, self.idx)
+        self.item = pyglet.text.HTMLLabel(**font_item)
 
         font_item_selected['x'] = int(pos_x)
         font_item_selected['y'] = int(pos_y)
-        font_item_selected['text'] = self.label
-        # font_item_selected['width'] = self.labelwidth
-        # font_item_selected['multiline'] = True
-
-        self.item_selected = pyglet.text.Label(**font_item_selected)
-        print(self.item_selected.content_width)
-        self.item_selected.content_width = self.labelwidth
-        print(self.item_selected.content_width)
+        font_item_selected['text'] = self.text_template.format(self.label, padding, self.idx)
+        self.item_selected = pyglet.text.HTMLLabel(**font_item_selected)
 
     def _get_label(self):
-        label_len = len(self.my_label)
-        padding_space = ' '*(self.labelwidth-label_len)
-        return self.my_label + padding_space + self.items[self.idx]
+        padding = " "*(self.text_tag_len - len(self.my_label))
+        return self.text_template.format(self.my_label, padding, self.idx)
 
 class CharactersMenu(Menu):
     is_event_handler = True
     def __init__(self):
         super().__init__()
+        if hasattr(self, 'draw'):
+            self.drawfun = getattr(self, 'draw')
+
         self.font_item = {
             'font_name': 'Arial',
             'font_size': 32,
@@ -86,6 +77,12 @@ class CharactersMenu(Menu):
             'anchor_y': 'center',
             'anchor_x': 'center',
             'color': (192, 192, 192, 255),
+            'dpi': 96,
+        }
+
+        self.font_html = {
+            'anchor_y': 'center',
+            'anchor_x': 'center',
             'dpi': 96,
         }
 
@@ -103,11 +100,14 @@ class CharactersMenu(Menu):
         m = []
         m.append(CharacterMenuItem("Setting", self.haha, [str(i) for i in range(10)]))
         m.append(CharacterMenuItem("Start", self.haha, ['0', '1', '2']))
-        self.create_menu(m)
+        self.create_menu(m, layout_strategy=menuLayout)
 
     def haha(self, *args):
+        print(args)
         print('haha')
 
+    def draw(self):
+        return self.drawfun
 
 if __name__ == '__main__':
     director.init(width=728, height=424)
