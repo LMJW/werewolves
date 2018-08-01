@@ -25,8 +25,8 @@ class MenuButton(MenuItem):
 
 class StartUpMenu(Menu):
     is_event_handler = True
-    def __init__(self):
-        super().__init__()
+    def __init__(self, title = ''):
+        super().__init__(title)
         m = []
         m.append(MenuButton("Setting", self.on_game_setting))
         m.append(MenuButton("Start", self.on_new_game))
@@ -40,5 +40,5 @@ class StartUpMenu(Menu):
 
 if __name__ == '__main__':
     director.init(width=728, height=424)
-    scene = Scene(Background(), StartUpMenu())
+    scene = Scene(Background(), StartUpMenu("ONE NIGHT WEREWOLF"))
     director.run(scene)

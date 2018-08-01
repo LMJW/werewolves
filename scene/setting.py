@@ -4,7 +4,7 @@ from cocos.layer import ColorLayer, Layer
 from cocos.menu import Menu, MenuItem, MultipleMenuItem
 from cocos.scene import Scene
 from cocos.text import Label
-from pyglet.window import key
+from pyglet.window import key, mouse
 
 from config import (_DEFAULT_SELECTED_TEXT_COLOR, _DEFAULT_TEXT_COLOR,
                     _GAME_CHARACTERS)
@@ -81,17 +81,18 @@ class CharacterMenuItem(MultipleMenuItem):
             self.item.text = self._get_label()
             self.item_selected.text = self._get_selected_label()
             self.callback_func(self.idx)
-            return True
+            return {self.my_label:self.idx}
 
 
 class CharactersMenu(Menu):
     is_event_handler = True
 
     def __init__(self):
+        self.title_template = "Total game characters : {0:>3}"
+        self._game_char_dict = dict()
         super().__init__()
-        if hasattr(self, 'draw'):
-            self.drawfun = getattr(self, 'draw')
 
+        self.font_title.update({'font_size': 30})
         self.font_html = {
             'anchor_y': 'center',
             'anchor_x': 'center',
@@ -104,12 +105,61 @@ class CharactersMenu(Menu):
 
         self.create_menu(m, layout_strategy=menuLayout)
 
+    def _activate_item(self):
+        if self.activate_sound:
+            self.activate_sound.play()
+        self.children[self.selected_index][1].on_activated()
+        updated_player_data = self.children[self.selected_index][1].on_key_press(key.ENTER, 0)
+        if updated_player_data:
+            self._game_char_dict.update(updated_player_data)
+            self._generate_title()
+            return True
+
+    def _generate_title(self):
+        width, height = director.get_window_size()
+
+        self.font_title['x'] = width // 2
+        self.font_title['text'] = self.title_template.format(sum(self._game_char_dict.values()))
+        self.title_label = pyglet.text.Label(**self.font_title)
+        self.title_label.y = height - self.title_label.content_height // 2
+
+        self.title_height = self.title_label.content_height
+
+    def on_key_press(self, symbol, modifiers):
+        if symbol == key.ESCAPE:
+            self.on_exit()
+            return True
+        elif symbol in (key.ENTER, key.NUM_ENTER):
+            self._activate_item()
+            return True
+        elif symbol in (key.DOWN, key.UP):
+            if symbol == key.DOWN:
+                new_idx = self.selected_index + 1
+            elif symbol == key.UP:
+                new_idx = self.selected_index - 1
+
+            if new_idx < 0:
+                new_idx = len(self.children) - 1
+            elif new_idx > len(self.children) - 1:
+                new_idx = 0
+            self._select_item(new_idx)
+            return True
+        else:
+            # send the menu item the rest of the keys
+            updated_player_data = self.children[self.selected_index][1].on_key_press(symbol, modifiers)
+            try:
+                self._game_char_dict.update(updated_player_data)
+            except TypeError:
+                return
+            # play sound if key was handled
+            if updated_player_data and self.activate_sound:
+                self.activate_sound.play()
+            self._generate_title()
+            return True
+
     def haha(self, *args):
         print(args)
-        print('haha')
 
-    def draw(self):
-        return self.drawfun
 
 
 if __name__ == '__main__':
