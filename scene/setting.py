@@ -10,7 +10,6 @@ def menuLayout(menu):
     width, height = director.get_window_size()
     fo = pyglet.font.load(menu.font_item['font_name'], menu.font_item['font_size'])
     fo_height = int((fo.ascent - fo.descent) * 0.9)
-
     if menu.menu_halign == pyglet.font.Text.CENTER:
         pos_x = width // 2
     elif menu.menu_halign == pyglet.font.Text.RIGHT:
@@ -42,25 +41,25 @@ class Setting(Layer):
 class CharacterMenuItem(MultipleMenuItem):
 
     def __init__(self, *args, **kwargs):
-        self.text_template = "<pre><font color='red'>{}{}: {}</font></pre>"
-        self.text_tag_len = 20
+        self.text_template = "<pre><font color='red'>{0:<20}:{1:>3}</font></pre>"
         super().__init__(*args, **kwargs)
     # overwrite the generateWidgets to get the fixed width label
     def generateWidgets(self, pos_x, pos_y, font_item, font_item_selected):
         font_item['x'] = int(pos_x)
         font_item['y'] = int(pos_y)
-        padding = " "*(self.text_tag_len - len(self.label))
-        font_item['text'] = self.text_template.format(self.label, padding, self.idx)
+        font_item['text'] = self.label
+
         self.item = pyglet.text.HTMLLabel(**font_item)
 
         font_item_selected['x'] = int(pos_x)
         font_item_selected['y'] = int(pos_y)
-        font_item_selected['text'] = self.text_template.format(self.label, padding, self.idx)
+        font_item_selected['text'] = self.label
+
         self.item_selected = pyglet.text.HTMLLabel(**font_item_selected)
 
     def _get_label(self):
-        padding = " "*(self.text_tag_len - len(self.my_label))
-        return self.text_template.format(self.my_label, padding, self.idx)
+        p = self.text_template.format(self.my_label, self.idx)
+        return p
 
 class CharactersMenu(Menu):
     is_event_handler = True
@@ -69,36 +68,14 @@ class CharactersMenu(Menu):
         if hasattr(self, 'draw'):
             self.drawfun = getattr(self, 'draw')
 
-        self.font_item = {
-            'font_name': 'Arial',
-            'font_size': 32,
-            'bold': False,
-            'italic': False,
-            'anchor_y': 'center',
-            'anchor_x': 'center',
-            'color': (192, 192, 192, 255),
-            'dpi': 96,
-        }
-
         self.font_html = {
             'anchor_y': 'center',
             'anchor_x': 'center',
             'dpi': 96,
         }
 
-        self.font_item_selected = {
-            'font_name': 'Arial',
-            'font_size': 32,
-            'bold': True,
-            'italic': False,
-            'anchor_y': 'center',
-            'anchor_x': 'center',
-            'color': (255, 255, 255, 255),
-            'dpi': 96,
-        }
-
         m = []
-        m.append(CharacterMenuItem("Setting", self.haha, [str(i) for i in range(10)]))
+        m.append(CharacterMenuItem("Setting", self.haha, [str(i) for i in range(11)]))
         m.append(CharacterMenuItem("Start", self.haha, ['0', '1', '2']))
         self.create_menu(m, layout_strategy=menuLayout)
 
