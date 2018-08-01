@@ -1,15 +1,20 @@
 import pyglet
 from cocos.director import director
-from cocos.layer import Layer, ColorLayer
+from cocos.layer import ColorLayer, Layer
+from cocos.menu import Menu, MenuItem, MultipleMenuItem
 from cocos.scene import Scene
-from cocos.menu import Menu, MultipleMenuItem
 from cocos.text import Label
+from pyglet.window import key
+
+from config import (_DEFAULT_SELECTED_TEXT_COLOR, _DEFAULT_TEXT_COLOR,
+                    _GAME_CHARACTERS)
 
 
 def menuLayout(menu):
     width, height = director.get_window_size()
-    fo = pyglet.font.load(menu.font_item['font_name'], menu.font_item['font_size'])
-    fo_height = int((fo.ascent - fo.descent) * 0.9)
+    fo = pyglet.font.load(menu.font_item['font_name'],
+                          menu.font_item['font_size'])
+    fo_height = int((fo.ascent - fo.descent) * 0.5)
     if menu.menu_halign == pyglet.font.Text.CENTER:
         pos_x = width // 2
     elif menu.menu_halign == pyglet.font.Text.RIGHT:
@@ -22,27 +27,28 @@ def menuLayout(menu):
     for idx, i in enumerate(menu.children):
         item = i[1]
         if menu.menu_valign == pyglet.font.Text.CENTER:
-            pos_y = (height + (len(menu.children) - 2 * idx)
-                     * fo_height - menu.title_height) * 0.5
+            pos_y = (height + (len(menu.children) - 2 * idx) * fo_height -
+                     menu.title_height) * 0.5
         elif menu.menu_valign == pyglet.font.Text.TOP:
-            pos_y = (height - ((idx + 0.8) * fo_height)
-                     - menu.title_height - menu.menu_vmargin)
-        elif menu.menu_valign == pyglet.font.Text.BOTTOM:
-            pos_y = (0 + fo_height * (len(menu.children) - idx) +
+            pos_y = (height - ((idx + 0.8) * fo_height) - menu.title_height -
                      menu.menu_vmargin)
+        elif menu.menu_valign == pyglet.font.Text.BOTTOM:
+            pos_y = (
+                0 + fo_height * (len(menu.children) - idx) + menu.menu_vmargin)
         item.transform_anchor = (pos_x, pos_y)
-        item.generateWidgets(pos_x, pos_y, menu.font_html,
-                             menu.font_html)
+        item.generateWidgets(pos_x, pos_y, menu.font_html, menu.font_html)
+
 
 class Setting(Layer):
     def __init__(self):
         super().__init__()
 
-class CharacterMenuItem(MultipleMenuItem):
 
+class CharacterMenuItem(MultipleMenuItem):
     def __init__(self, *args, **kwargs):
-        self.text_template = "<pre><font color='red'>{0:<20}:{1:>3}</font></pre>"
+        self.text_template = "<pre><font color={2}>{0:<20}:{1:>3}</font></pre>"
         super().__init__(*args, **kwargs)
+
     # overwrite the generateWidgets to get the fixed width label
     def generateWidgets(self, pos_x, pos_y, font_item, font_item_selected):
         font_item['x'] = int(pos_x)
@@ -53,16 +59,34 @@ class CharacterMenuItem(MultipleMenuItem):
 
         font_item_selected['x'] = int(pos_x)
         font_item_selected['y'] = int(pos_y)
-        font_item_selected['text'] = self.label
+        font_item_selected['text'] = self._get_selected_label()
 
         self.item_selected = pyglet.text.HTMLLabel(**font_item_selected)
 
     def _get_label(self):
-        p = self.text_template.format(self.my_label, self.idx)
-        return p
+        return self.text_template.format(self.my_label, self.idx,
+                                         _DEFAULT_TEXT_COLOR)
+
+    def _get_selected_label(self):
+        return self.text_template.format(self.my_label, self.idx,
+                                         _DEFAULT_SELECTED_TEXT_COLOR)
+
+    def on_key_press(self, symbol, modifiers):
+        if symbol == key.LEFT:
+            self.idx = max(0, self.idx - 1)
+        elif symbol in (key.RIGHT, key.ENTER):
+            self.idx = min(len(self.items) - 1, self.idx + 1)
+
+        if symbol in (key.LEFT, key.RIGHT, key.ENTER):
+            self.item.text = self._get_label()
+            self.item_selected.text = self._get_selected_label()
+            self.callback_func(self.idx)
+            return True
+
 
 class CharactersMenu(Menu):
     is_event_handler = True
+
     def __init__(self):
         super().__init__()
         if hasattr(self, 'draw'):
@@ -75,8 +99,9 @@ class CharactersMenu(Menu):
         }
 
         m = []
-        m.append(CharacterMenuItem("Setting", self.haha, [str(i) for i in range(11)]))
-        m.append(CharacterMenuItem("Start", self.haha, ['0', '1', '2']))
+        for k, v in _GAME_CHARACTERS.items():
+            m.append(CharacterMenuItem(k, self.haha, v))
+
         self.create_menu(m, layout_strategy=menuLayout)
 
     def haha(self, *args):
@@ -85,6 +110,7 @@ class CharactersMenu(Menu):
 
     def draw(self):
         return self.drawfun
+
 
 if __name__ == '__main__':
     director.init(width=728, height=424)
