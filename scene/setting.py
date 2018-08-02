@@ -53,7 +53,7 @@ class CharacterMenuItem(MultipleMenuItem):
     def generateWidgets(self, pos_x, pos_y, font_item, font_item_selected):
         font_item['x'] = int(pos_x)
         font_item['y'] = int(pos_y)
-        font_item['text'] = self.label
+        font_item['text'] = self._get_label()
 
         self.item = pyglet.text.HTMLLabel(**font_item)
 
@@ -81,8 +81,12 @@ class CharacterMenuItem(MultipleMenuItem):
             self.item.text = self._get_label()
             self.item_selected.text = self._get_selected_label()
             self.callback_func(self.idx)
-            return {self.my_label:self.idx}
+            return {self.my_label: self.idx}
 
+class FinishMenuItem(CharacterMenuItem):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.text_template = "<pre><font color={2}>{0}</font></pre>"
 
 class CharactersMenu(Menu):
     is_event_handler = True
@@ -102,6 +106,7 @@ class CharactersMenu(Menu):
         m = []
         for k, v in _GAME_CHARACTERS.items():
             m.append(CharacterMenuItem(k, self.haha, v))
+        m.append(FinishMenuItem("Finish", self.finish, ' '))
 
         self.create_menu(m, layout_strategy=menuLayout)
 
@@ -109,8 +114,9 @@ class CharactersMenu(Menu):
         if self.activate_sound:
             self.activate_sound.play()
         self.children[self.selected_index][1].on_activated()
-        updated_player_data = self.children[self.selected_index][1].on_key_press(key.ENTER, 0)
-        if updated_player_data:
+        updated_player_data = self.children[self.selected_index][
+            1].on_key_press(key.ENTER, 0)
+        if isinstance(updated_player_data, dict):
             self._game_char_dict.update(updated_player_data)
             self._generate_title()
             return True
@@ -119,7 +125,8 @@ class CharactersMenu(Menu):
         width, height = director.get_window_size()
 
         self.font_title['x'] = width // 2
-        self.font_title['text'] = self.title_template.format(sum(self._game_char_dict.values()))
+        self.font_title['text'] = self.title_template.format(
+            sum(self._game_char_dict.values()))
         self.title_label = pyglet.text.Label(**self.font_title)
         self.title_label.y = height - self.title_label.content_height // 2
 
@@ -146,7 +153,8 @@ class CharactersMenu(Menu):
             return True
         else:
             # send the menu item the rest of the keys
-            updated_player_data = self.children[self.selected_index][1].on_key_press(symbol, modifiers)
+            updated_player_data = self.children[self.selected_index][
+                1].on_key_press(symbol, modifiers)
             try:
                 self._game_char_dict.update(updated_player_data)
             except TypeError:
@@ -160,6 +168,8 @@ class CharactersMenu(Menu):
     def haha(self, *args):
         print(args)
 
+    def finish(self, *args):
+        print('finish')
 
 
 if __name__ == '__main__':
