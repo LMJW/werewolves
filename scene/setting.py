@@ -83,10 +83,12 @@ class CharacterMenuItem(MultipleMenuItem):
             self.callback_func(self.idx)
             return {self.my_label: self.idx}
 
+
 class FinishMenuItem(CharacterMenuItem):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.text_template = "<pre><font color={2}>{0}</font></pre>"
+
 
 class CharactersMenu(Menu):
     is_event_handler = True
