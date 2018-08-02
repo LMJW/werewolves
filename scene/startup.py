@@ -27,6 +27,20 @@ class StartUpMenu(Menu):
     is_event_handler = True
     def __init__(self, title = ''):
         super().__init__(title)
+
+        self.font_title = {
+            'text': 'title',
+            'font_name': 'Arial',
+            'font_size': 44,
+            'color': (192, 192, 192, 255),
+            'bold': False,
+            'italic': False,
+            'anchor_y': 'center',
+            'anchor_x': 'center',
+            'dpi': 96,
+            'x': 0, 'y': 0,
+        }
+
         m = []
         m.append(MenuButton("Setting", self.on_game_setting))
         m.append(MenuButton("Start", self.on_new_game))
