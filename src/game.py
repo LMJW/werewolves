@@ -144,7 +144,7 @@ class Gameplay(Gamedisplay):
 
         self.action_player = pyglet.media.Player()
         self.schedule_interval(self.tatafunc, 1)
-        self.tata = 1
+        self.tata = 0
 
 
     def tatafunc(self, *args):
@@ -161,7 +161,7 @@ class Gameplay(Gamedisplay):
         else:
             image = "doppelganger_150x.png"
             text = "Doppelganger"
-            self.action_player = pyglet.resource.media('everyone-start.wav').play()
+            self.action_player = pyglet.resource.media('doppelganger-start.wav').play()
         self.update(image, text)
 
 
