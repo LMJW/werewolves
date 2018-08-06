@@ -1,6 +1,5 @@
 import cocos
 import pyglet
-from cocos.actions import Delay, MoveBy
 from cocos.director import director
 from cocos.layer import Layer
 from cocos.menu import Menu, MenuItem
@@ -139,26 +138,40 @@ class ControlMenuItem(MenuItem):
 class Gameplay(Gamedisplay):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.schedule_interval(self.tatafunc, 5)
+        self.player = pyglet.media.Player()
+        self.player.queue(pyglet.resource.media("bgm_music.wav"))
+        self.player.play()
+
+        self.action_player = pyglet.media.Player()
+        self.schedule_interval(self.tatafunc, 1)
         self.tata = 1
 
+
     def tatafunc(self, *args):
+        if self.action_player.playing:
+            return
+        self.action_player.delete()
+        print("update the scene")
         self.tata = (self.tata +1)%2
         print("tata = {}".format(self.tata))
         if self.tata:
             image = "villager_150x.png"
             text = "Villager"
+            self.action_player = pyglet.resource.media('everyone-start.wav').play()
         else:
             image = "doppelganger_150x.png"
             text = "Doppelganger"
+            self.action_player = pyglet.resource.media('everyone-start.wav').play()
         self.update(image, text)
+
 
 if __name__ == "__main__":
     import os
     root_dir = os.chdir("../")
-    pyglet.resource.path = [os.getcwd() + '/data/image/']
+    pyglet.options['audio'] = ('openal', 'pulse', 'directsound', 'silent')
+    pyglet.resource.path = [os.getcwd() + '/data/image/', os.getcwd() + '/data/audio/']
     pyglet.resource.reindex()
     pyglet.font.add_directory(os.getcwd() + '/data/Fonts/')
     director.init(width=800, height=600)
-    scene = Scene(Background(), Gameplay(), ControlMenu())
+    scene = Scene(Background(), ControlMenu(), Gameplay())
     director.run(scene)

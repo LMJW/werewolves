@@ -175,6 +175,6 @@ class CharactersMenu(Menu):
 
 
 if __name__ == '__main__':
-    director.init(width=728, height=424)
+    director.init(width=800, height=600)
     scene = Scene(Setting(), CharactersMenu())
     director.run(scene)
