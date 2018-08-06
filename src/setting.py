@@ -89,6 +89,11 @@ class FinishMenuItem(CharacterMenuItem):
         super().__init__(*args, **kwargs)
         self.text_template = "<pre><font color={2}>{0}</font></pre>"
 
+    def on_key_press(self, symbol, modifiers):
+        if symbol in (key.LEFT, key.RIGHT, key.ENTER):
+            self.item.text = self._get_label()
+            self.item_selected.text = self._get_selected_label()
+            self.callback_func()
 
 class CharactersMenu(Menu):
     is_event_handler = True
@@ -107,7 +112,7 @@ class CharactersMenu(Menu):
 
         m = []
         for k, v in _GAME_CHARACTERS.items():
-            m.append(CharacterMenuItem(k, self.haha, v))
+            m.append(CharacterMenuItem(k, self.update_menu, v))
         m.append(FinishMenuItem("Finish", self.finish, ' '))
 
         self.create_menu(m, layout_strategy=menuLayout)
@@ -167,11 +172,11 @@ class CharactersMenu(Menu):
             self._generate_title()
             return True
 
-    def haha(self, *args):
-        print(args)
+    def update_menu(self, *args):
+        pass
 
     def finish(self, *args):
-        print('finish')
+        print(self._game_char_dict)
 
 
 if __name__ == '__main__':
