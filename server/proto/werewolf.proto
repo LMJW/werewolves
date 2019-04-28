@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package werewolf;
+
+service Werewolf {
+
+  // Use some user input information, to generated a unique ID to identify user
+  // in the system. Uid can be used to reconnect to the game.
+  rpc CreateID(Signature) returns (Player) {}
+
+  // Game service serve the communication between client and server for game
+  // commands. Using server side streaming to ensure the game process flow
+  // smoothly.
+  rpc Game(Request) returns (stream Response) {}
+}
+
+// user input some information to generate their uid
+message Signature {
+  string username = 1;
+  string displayname = 2;
+  int32 randomcode = 3;
+}
+
+// Player is the message descripe a player
+// it contains the display name as a string and an unique id
+message Player {
+  string name = 1;
+  string uid = 2;
+}
+
+// the request contains the game command
+message Request {
+  Player sender = 1;
+  string action = 2;
+  repeated Player receiver = 3;
+}
+
+// the response of the game command
+message Response {
+  string status = 1;
+  repeated string results = 2;
+}
