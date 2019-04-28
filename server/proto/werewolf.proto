@@ -11,7 +11,7 @@ service Werewolf {
   // Game service serve the communication between client and server for game
   // commands. Using server side streaming to ensure the game process flow
   // smoothly.
-  rpc Game(Request) returns (stream Response) {}
+  rpc Game(stream Request) returns (stream Response) {}
 }
 
 // user input some information to generate their uid
