@@ -21,14 +21,14 @@ const (
 // server is used to implement Werewolf.WerewolfServer.
 type server struct {
 	count     int
-	broadcast []chan int
+	broadcast map[int]chan int
 	state     bool
 	mux       sync.Mutex
 }
 
 func (s *server) Register(l chan int) {
 	s.mux.Lock()
-	s.broadcast = append(s.broadcast, l)
+	s.broadcast[len(s.broadcast)] = l
 	s.mux.Unlock()
 	if s.state == true {
 		return
@@ -37,16 +37,24 @@ func (s *server) Register(l chan int) {
 	s.Start()
 }
 
+func (s *server) remove(i int) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	delete(s.broadcast, i)
+	log.Printf("Player (%d) removed for server broadcast list\n", i)
+}
+
 func (s *server) Start() {
 	go func() {
 		for {
 			time.Sleep(time.Second)
 			s.count++
-			for i, v := range s.broadcast {
+			for k, v := range s.broadcast {
 				select {
 				case v <- s.count:
 				default:
-					fmt.Printf("player (%d) is blocking\n", i)
+					fmt.Printf("player (%d) is blocking\n", k)
+					s.remove(k)
 				}
 			}
 		}
@@ -72,6 +80,7 @@ func (s *server) Game(srv pb.Werewolf_GameServer) error {
 			})
 			if err != nil {
 				fmt.Printf("error sending message: %s\n", err)
+				return
 			}
 		}
 	}()
@@ -87,6 +96,7 @@ func (s *server) Game(srv pb.Werewolf_GameServer) error {
 		})
 		if err != nil {
 			fmt.Printf("error sending message: %s\n", err)
+			return err
 		}
 	}
 }
@@ -99,7 +109,7 @@ func main() {
 	s := grpc.NewServer()
 	pb.RegisterWerewolfServer(s, &server{
 		count:     0,
-		broadcast: make([]chan int, 0),
+		broadcast: make(map[int]chan int),
 		state:     false,
 	})
 	if err := s.Serve(lis); err != nil {
