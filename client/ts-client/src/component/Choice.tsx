@@ -4,7 +4,7 @@ import { Paper, Typography, Button } from '@material-ui/core';
 
 interface UserProps {}
 
-const JoinGame: React.FC<UserProps> = props => {
+const Choice: React.FC<UserProps> = props => {
   const classes = useStyles();
   return (
     <div className={classes.container}>
@@ -32,4 +32,4 @@ const JoinGame: React.FC<UserProps> = props => {
   );
 };
 
-export default JoinGame;
+export default Choice;
