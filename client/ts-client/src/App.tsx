@@ -1,12 +1,24 @@
 import React from 'react';
 import './App.css';
-import Login from './component/login';
+import { Provider } from 'react-redux';
+import Login from './component/Login';
+import { createStore, applyMiddleware } from 'redux';
+import { RootReducer } from './store/index';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import { createLogger } from 'redux-logger';
+
+const store = createStore(
+  RootReducer,
+  composeWithDevTools(applyMiddleware(createLogger()))
+);
 
 const App: React.FC = () => {
   return (
-    <div className='App'>
-      <Login />
-    </div>
+    <Provider store={store}>
+      <div className='App'>
+        <Login />
+      </div>
+    </Provider>
   );
 };
 
