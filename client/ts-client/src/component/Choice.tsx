@@ -4,7 +4,7 @@ import { Paper, Typography, Button } from '@material-ui/core';
 
 interface UserProps {}
 
-const Choice: React.FC<UserProps> = props => {
+const Choice = (props: UserProps) => {
   const classes = useStyles();
   return (
     <div className={classes.container}>

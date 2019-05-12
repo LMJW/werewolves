@@ -1,4 +1,5 @@
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import {
   FormControl,
   Paper,
@@ -9,10 +10,17 @@ import {
   Typography
 } from '@material-ui/core';
 import useStyles from '../style/styles';
+import { connect } from 'react-redux';
+import { UserLoginState } from '../store/login/types';
 
-interface LoginProps {}
+interface LoginProps {
+  loading: boolean;
+  error?: string;
+}
 
-const Login: React.FC<LoginProps> = props => {
+type Props = LoginProps & UserLoginState;
+
+const Login = (props: LoginProps) => {
   const classes = useStyles();
   return (
     <div className={classes.container}>
@@ -46,4 +54,10 @@ const Login: React.FC<LoginProps> = props => {
   );
 };
 
-export default Login;
+const mapStateToProps = (state: UserLoginState) => ({
+  loginState: state.loginState,
+  username: state.username,
+  session: state.session
+});
+
+export default connect(mapStateToProps)(Login);

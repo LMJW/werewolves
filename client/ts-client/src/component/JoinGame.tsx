@@ -11,7 +11,7 @@ import {
 
 interface JoinProps {}
 
-const JoinGame: React.FC<JoinProps> = props => {
+const JoinGame = (props: JoinProps) => {
   const classes = useStyles();
   return (
     <div className={classes.container}>
