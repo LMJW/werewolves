@@ -1,10 +1,9 @@
 import React from 'react';
 import useStyles from '../style/styles';
 import { Typography, Paper } from '@material-ui/core';
+import { withRouter } from 'react-router-dom';
 
-interface GameProps {}
-
-const Game = (props: GameProps) => {
+const Game = props => {
   const classes = useStyles();
   return (
     <div className={classes.container}>
@@ -16,4 +15,4 @@ const Game = (props: GameProps) => {
   );
 };
 
-export default Game;
+export default withRouter(Game);

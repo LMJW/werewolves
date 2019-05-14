@@ -9,9 +9,7 @@ import {
   InputAdornment
 } from '@material-ui/core';
 
-interface JoinProps {}
-
-const JoinGame = (props: JoinProps) => {
+const JoinGame = props => {
   const classes = useStyles();
   return (
     <div className={classes.container}>

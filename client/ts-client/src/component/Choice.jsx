@@ -2,9 +2,7 @@ import React from 'react';
 import useStyles from '../style/styles';
 import { Paper, Typography, Button } from '@material-ui/core';
 
-interface UserProps {}
-
-const Choice = (props: UserProps) => {
+const Choice = props => {
   const classes = useStyles();
   return (
     <div className={classes.container}>

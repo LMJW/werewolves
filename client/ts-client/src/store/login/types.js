@@ -1,0 +1,2 @@
+export const USER_LOGIN = 'USER_LOGIN';
+export const VALIDATE_SESSION = 'VALIDATE_SESSION';
